@@ -1,0 +1,104 @@
+Props Drilling acontece quando dados precisam ser repassadas de pai para filhos 
+em uma árvore (ocorre em chamadas de componentes), de modo que para que um
+componente receba um dado que está no seu avó, precise passar pelo seu pai através
+do props, mesmo que o pai não use o dado. Usando o contexto, podemos evitar esse 
+problema, visto que será criado um contexto (um componente separado), o componente
+que quer compartilhar alguma informação vai usar esse contexto como provedor para enviar
+os dados para os demais nós (não precisam ser filhos de quem está provendo, pode ser um
+descendente mais distante). Os nós que necessitam desse dados irão consumir o contexto,
+de modo que o valor nele contido poderá ser acessado através desse consumo. E ao atualizar
+o valor compartilhado pelo provedor, os nós que o consomem serão atualizados automaticamente.
+
+----------------------------------------------------------------
+Com props drilling:
+
+/* componente A */
+import FuncaoC from "./FuncaoC"
+
+const FuncaoA = () => {
+    const cor = "blue"
+    return (
+        <div>
+        <h1 style={{backgroundColor: cor}}>Funcao A</h1>
+        <FuncaoC />
+        </div>
+    )
+}
+
+export default FuncaoA
+
+/* Componente C */
+import FuncaoD from "./FuncaoD"
+
+const FuncaoC = (props) => {
+    return (
+        <div>
+            <h1 style ={{backgroundColor: props.cor}}>Funcao C</h1>
+            <FuncaoD/>
+        </div>
+        
+    )
+}
+
+export default FuncaoC
+
+/* Componente D */
+const FuncaoD = () => {
+    return (
+        <div>
+            <h1>Funcao D</h1>
+        </div>
+        
+    )
+}
+
+export default FuncaoD
+----------------------------------------------------------------
+Com contexto:
+/* Contexto */
+import { createContext } from "react";
+
+const MinhaCor = createContext()
+
+export default MinhaCor
+
+/* Componente provedor */
+import FuncaoB from "./FuncaoB"
+import FuncaoC from "./FuncaoC"
+import MinhaCor from "./MeuContexto"
+
+const FuncaoA = () => {
+    const cor = "blue"
+    return (
+        <MinhaCor.Provider value = {cor}>
+            <div>
+            <h1 style={{backgroundColor: cor}}>Funcao A</h1>
+            <FuncaoB />
+            <FuncaoC />
+            </div>
+        </MinhaCor.Provider>
+    )
+}
+
+export default FuncaoA
+
+/* Componente consumidor do contexto */
+import MinhaCor from "./MeuContexto"
+
+const FuncaoB = () => {
+    return (
+        <MinhaCor.Consumer>
+            {
+                (cor) => {
+                    return (
+                        <div>
+                            <h1 style = {{backgroundColor :cor}}>Funcao B</h1>
+                        </div>
+                    )
+                }
+            }
+        </MinhaCor.Consumer>
+    )
+}
+
+export default FuncaoB
